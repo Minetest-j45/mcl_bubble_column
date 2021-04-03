@@ -93,7 +93,6 @@ minetest.register_node("mcl_bubble_column:water_source_up", {
 	_mcl_hardness = -1,
 })
 
-
 minetest.register_globalstep(function()
     for _,player in ipairs(minetest.get_connected_players()) do
         local name = player:get_player_name()
@@ -101,11 +100,26 @@ minetest.register_globalstep(function()
         local node = minetest.get_node(pos)
         if node.name == "mcl_bubble_column:water_source_up" then
             local velocity = player:get_player_velocity()
-            local velocityadd = {x = 0, y = 4, z = 0}
+            local velocityadd = {x = 0, y = 3, z = 0}
             player:add_player_velocity(velocityadd)
         end
     end
 end)
+
+minetest.register_abm{
+    label = "entities go up",
+    nodenames = {"mcl_bubble_column:water_source_up"},
+    interval = 0.05,
+    chance = 1,
+    action = function(pos)
+        for _,entity in pairs(minetest.get_objects_inside_radius(pos, 1.5)) do
+        	local pos = entity:get_pos()
+            local velocity = entity:get_velocity()
+            local velocityadd = {x = 0, y = 2, z = 0}
+            entity:add_velocity(velocityadd)
+    	end
+    end,
+}
 
 minetest.register_abm{
     label = "bubbles go up",
@@ -266,11 +280,27 @@ minetest.register_globalstep(function()
         local node = minetest.get_node(pos)
         if node.name == "mcl_bubble_column:water_source_down" then
             local velocity = player:get_player_velocity()
-            local velocityadd = {x = 0, y = -1, z = 0}
+            local velocityadd = {x = 0, y = -0.5, z = 0}
             player:add_player_velocity(velocityadd)
         end
     end
 end)
+
+
+minetest.register_abm{
+    label = "entities go down",
+    nodenames = {"mcl_bubble_column:water_source_down"},
+    interval = 0.05,
+    chance = 1,
+    action = function(pos)
+        for _,entity in pairs(minetest.get_objects_inside_radius(pos, 1.5)) do
+        	local pos = entity:get_pos()
+            local velocity = entity:get_velocity()
+            local velocityadd = {x = 0, y = -3, z = 0}
+            entity:add_velocity(velocityadd)
+    	end
+    end,
+}
 
 minetest.register_abm{
     label = "whirlpools go up",
@@ -306,7 +336,7 @@ minetest.register_abm{
     interval = 1,
     chance = 1,
     action = function(pos)
-        local downpos = vector.add(pos, {x = 0, y = -0.5, z = 0})
+        local downpos = vector.add(pos, {x = 0, y = -1, z = 0})
         local downposnode = minetest.get_node(downpos)
         if downposnode.name == "mcl_core:water_source" then
             minetest.set_node(pos, {name = "mcl_core:water_source"})
