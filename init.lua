@@ -101,7 +101,7 @@ minetest.register_globalstep(function()
         local node = minetest.get_node(pos)
         if node.name == "mcl_bubble_column:water_source_up" then
             local velocity = player:get_player_velocity()
-            local velocityadd = {x = 0, y = 2, z = 0}
+            local velocityadd = {x = 0, y = 4, z = 0}
             player:add_player_velocity(velocityadd)
         end
     end
@@ -306,7 +306,7 @@ minetest.register_abm{
     interval = 1,
     chance = 1,
     action = function(pos)
-        local downpos = vector.add(pos, {x = 0, y = -1, z = 0})
+        local downpos = vector.add(pos, {x = 0, y = -0.5, z = 0})
         local downposnode = minetest.get_node(downpos)
         if downposnode.name == "mcl_core:water_source" then
             minetest.set_node(pos, {name = "mcl_core:water_source"})
