@@ -1,7 +1,7 @@
 # mcl_bubble_column
 
-[![ContentDB](https://content.minetest.net/packages/j45/mcl_bubble_column/shields/title/)](https://content.minetest.net/packages/j45/mcl_bubble_column/)
-[![ContentDB](https://content.minetest.net/packages/j45/mcl_bubble_column/shields/downloads/)](https://content.minetest.net/packages/j45/mcl_bubble_column/)
+<!---[![ContentDB](https://content.minetest.net/packages/j45/mcl_bubble_column/shields/title/)](https://content.minetest.net/packages/j45/mcl_bubble_column/)
+[![ContentDB](https://content.minetest.net/packages/j45/mcl_bubble_column/shields/downloads/)](https://content.minetest.net/packages/j45/mcl_bubble_column/)--->
 
 Adds whirlpools and upwards bubble columns to Mineclone2/5
 
