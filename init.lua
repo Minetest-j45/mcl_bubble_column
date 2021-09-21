@@ -3,9 +3,6 @@ mcl_bubble_column = {}
 mcl_bubble_column.old_neighbors = {}
 mcl_bubble_column.new_neighbors = {}
 
---local default_water_groups = { water=3, liquid=3, puts_out_fire=1, freezes=1, not_in_creative_inventory=1, dig_by_piston=1}
---local bubble_column_groups = { water=3, liquid=3, puts_out_fire=1, freezes=1, not_in_creative_inventory=1, dig_by_piston=1, bubbly=1}
-
 minetest.register_abm{
     label = "neighborChangedSoulSand",
 	nodenames = {"mcl_nether:soul_sand"},
@@ -107,34 +104,6 @@ mcl_bubble_column.is_valid_pos = function(pos)
 	end
 end
 
-minetest.register_abm{
-    label = "bubbles up",
-    nodenames = {"group:bubbly"},
-    interval = 0.05,
-    chance = 1,
-    action = function(pos)
-		minetest.add_particle({
-			pos = {x = pos.x+0.5, y = pos.y, z = pos.z+0.5},
-			velocity = {x = 0, y = 1, z = 0},
-			expirationtime = 1,
-			size = math.random(0.7, 2.4),
-			texture = "mcl_particles_bubble.png"
-		})
-		minetest.add_particle({
-			pos = {x = pos.x+math.random(0, 1), y = pos.y+math.random(0, 1), z = pos.z+math.random(0, 1)},
-			velocity = {x = 0, y = 1, z = 0},
-			expirationtime = 1,
-			size = math.random(0.7, 2.4),
-			texture = "mcl_particles_bubble.png"
-		})minetest.add_particle({
-			pos = {x = pos.x+math.random(0, 1), y = pos.y+math.random(0, 1), z = pos.z+math.random(0, 1)},
-			velocity = {x = 0, y = 1, z = 0},
-			expirationtime = 1,
-			size = math.random(0.7, 2.4),
-			texture = "mcl_particles_bubble.png"
-		})
-    end,
-}
 
 mcl_bubble_column.on_entity_collided_with_bubble_column = function(pos)
 	local above = minetest.get_node(vector.add(pos, {x = 0, y = 1, z = 0}))
