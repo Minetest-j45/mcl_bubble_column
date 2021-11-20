@@ -160,3 +160,36 @@ minetest.register_globalstep(function()
 		end
 	end
 end)
+
+--abms to remove and replace old bubble columns/whirlpools
+minetest.register_abm{
+    label = "removeOldFlowingColumns",
+    nodenames = {"mcl_bubble_column:water_flowing_up", "mcl_bubble_column:water_flowing_down"},
+    interval = 1,--reduce lag
+    chance = 1,
+    action = function(pos)
+        minetest.set_node(pos, {name = "air"})
+    end,
+}
+minetest.register_abm{
+    label = "replaceBubbleColumns",
+    nodenames = {"mcl_bubble_column:water_source_up"},
+    interval = 1,--reduce lag
+    chance = 1,
+    action = function(pos)
+        minetest.set_node(pos, {name = "mcl_core:water_source"})
+		local meta = minetest.get_meta(pos)
+		meta:set_int("bubbly", 1)
+    end,
+}
+minetest.register_abm{
+	label = "replaceWhirlpools",
+	nodenames = {"mcl_bubble_column:water_source_down"},
+	interval = 1,--reduce lag
+	chance = 1,
+	action = function(pos)
+		minetest.set_node(pos, {name = "mcl_core:water_source"})
+		local meta = minetest.get_meta(pos)
+		meta:set_int("whirly", 1)
+	end,
+}
