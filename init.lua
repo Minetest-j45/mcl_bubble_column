@@ -1,161 +1,164 @@
 mcl_bubble_column = {}
 
-mcl_bubble_column.old_neighbors = {}
-mcl_bubble_column.new_neighbors = {}
-
 minetest.register_abm{
-    label = "neighborChangedSoulSand",
-	nodenames = {"mcl_nether:soul_sand"},
-	interval = 0.5,
+	label = "bubbleColumnUpStop",
+	nodenames = {"group:water"},
+	interval = 0.05,
 	chance = 1,
 	action = function(pos)
-		local plusx = minetest.get_node(vector.add(pos, {x = 1, y = 0, z = 0}))
-		local minusx = minetest.get_node(vector.add(pos, {x = -1, y = 0, z = 0}))
-		local plusz = minetest.get_node(vector.add(pos, {x = 1, y = 0, z = 1}))
-		local minusz = minetest.get_node(vector.add(pos, {x = 0, y = 0, z = -1}))
-		local up = minetest.get_node(vector.add(pos, {x = 0, y = 1, z = 0}))
-		local down = minetest.get_node(vector.add(pos, {x = 0, y = -1, z = 0}))
-		mcl_bubble_column.new_neighbors[pos] = {plusx, minusx, plusz, minusz, up, down}
-		
-		if mcl_bubble_column.old_neighbors[pos] == {} then
-			mcl_bubble_column.old_neighbors[pos] = mcl_bubble_column.new_neighbors[pos]
-		else
-			if mcl_bubble_column.new_neighbors[pos] ~= mcl_bubble_column.old_neighbors[pos] then
-				--neighbors changed
-				mcl_bubble_column.place_bubble_column(vector.add(pos, {x = 0, y = 1, z = 0}))--place bubble column one block up
-				mcl_bubble_column.old_neighbors[pos] = mcl_bubble_column.new_neighbors[pos]
+        local meta = minetest.get_meta(pos)
+        if meta:get_int("bubbly") == 1 then--bubble column
+        	--check down if current needs to be deleted
+        	local downpos = vector.add(pos, {x = 0, y = -1, z = 0})
+			local downposnode = minetest.get_node(downpos)
+			local downmeta = minetest.get_meta(downpos)
+			if (downmeta:get_int("bubbly") ~= 1 and downposnode.name ~= "mcl_nether:soul_sand") then
+				meta:set_int("bubbly", 0)
+			end
+        	--check up to see if needs to go up
+        	local uppos = vector.add(pos, {x = 0, y = 1, z = 0})
+        	local upposnode = minetest.get_node(uppos)
+        	local upmeta = minetest.get_meta(uppos)
+			if (minetest.get_item_group(upposnode.name, "water") == 3 and upmeta:get_int("bubbly") ~= 1) then
+        	    upmeta:set_int("bubbly", 1)
+			end
+		elseif meta:get_int("whirly") == 1 then--whirlpool
+        	--check down if current needs to be deleted
+        	local downpos = vector.add(pos, {x = 0, y = -1, z = 0})
+			local downposnode = minetest.get_node(downpos)
+			local downmeta = minetest.get_meta(downpos)
+			if (downmeta:get_int("whirly") ~= 1 and downposnode.name ~= "mcl_nether:magma") then
+				meta:set_int("whirly", 0)
+			end
+        	--check up to see if needs to go up
+        	local uppos = vector.add(pos, {x = 0, y = 1, z = 0})
+        	local upposnode = minetest.get_node(uppos)
+        	local upmeta = minetest.get_meta(uppos)
+			if (minetest.get_item_group(upposnode.name, "water") == 3 and upmeta:get_int("whirly") ~= 1) then
+        	    upmeta:set_int("whirly", 1)
 			end
 		end
 	end,
 }
 
-
-minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack, pointed_thing)
-	--checks
-	if oldnode == nil then return end
-	if newnode == nil then return end
-	if newnode.name == "mcl_nether:soul_sand" then
-		--soul sand placed
-		mcl_bubble_column.place_bubble_column(vector.add(pos, {x = 0, y = 1, z = 0}))
-	end
-end)
+minetest.register_abm{
+    label = "startBubbleColumn",
+    nodenames = {"mcl_nether:soul_sand"},
+    interval = 0.05,
+    chance = 1,
+    action = function(pos)
+        local uppos = vector.add(pos, {x = 0, y = 1, z = 0})
+        local upposnode = minetest.get_node(uppos)
+        local upmeta = minetest.get_meta(uppos)
+        if (minetest.get_item_group(upposnode.name, "water") == 3 and upmeta:get_int("bubbly") ~= 1) then
+            upmeta:set_int("bubbly", 1)
+        end
+    end,
+}
 
 minetest.register_abm{
-    label = "neighborChangedWater",
+    label = "startWhirlpool",
+    nodenames = {"mcl_nether:magma"},
+    interval = 0.05,
+    chance = 1,
+    action = function(pos)
+        local uppos = vector.add(pos, {x = 0, y = 1, z = 0})
+        local upposnode = minetest.get_node(uppos)
+        local upmeta = minetest.get_meta(uppos)
+        if (minetest.get_item_group(upposnode.name, "water") == 3 and upmeta:get_int("whirly") ~= 1) then
+            upmeta:set_int("whirly", 1)
+        end
+    end,
+}
+
+
+mcl_bubble_column.on_enter_bubble_column = function(self, pos)
+	local velocity = self:get_velocity()
+	local down = minetest.get_node(vector.add(pos, {x = 0, y = -1, z = 0}))
+	--[[if down.name == "mcl_nether:soul_sand" then
+		self:add_velocity({x = 0, y = math.min(10, math.abs(velocity.y)+9.4), z = 0})
+	else]]
+	self:add_velocity({x = 0, y = math.min(3.6, math.abs(velocity.y)+3), z = 0})
+	--end
+end
+
+mcl_bubble_column.on_enter_whirlpool = function(self)
+	local velocity = self:get_velocity()
+	--self:add_velocity({x = 0, y = math.max(-3, (-math.abs(velocity.y))-2), z = 0})
+	self:add_velocity({x = 0, y = math.max(-0.3, (-math.abs(velocity.y))-0.03), z = 0})
+end
+
+mcl_bubble_column.on_enter_bubble_column_with_air_above = function(self, pos)
+	local velocity = self:get_velocity()
+	local down = minetest.get_node(vector.add(pos, {x = 0, y = -1, z = 0}))
+	--[[if down.name == "mcl_nether:soul_sand" then
+		self:add_velocity({x = 0, y = math.min(4.3, math.abs(velocity.y)+2.8), z = 0})
+	else]]
+	self:add_velocity({x = 0, y = math.min(2.6, math.abs(velocity.y)+2), z = 0})
+	--end
+end
+
+mcl_bubble_column.on_enter_whirlpool_with_air_above = function(self)
+	local velocity = self:get_velocity()
+	--self:add_velocity({x = 0, y = math.max(-3.5, (-math.abs(velocity.y))-2), z = 0})
+	self:add_velocity({x = 0, y = math.max(-0.9, (-math.abs(velocity.y))-0.03), z = 0})
+end
+
+minetest.register_abm{
+	label = "entGo",
 	nodenames = {"group:water"},
-	interval = 0.5,
+	interval = 0.05,
 	chance = 1,
 	action = function(pos)
 		--if not bubble column block return
 		local meta = minetest.get_meta(pos)
-		if meta:get_int("bubbly") == 0 then return end
-		
-		local plusx = minetest.get_node(vector.add(pos, {x = 1, y = 0, z = 0}))
-		local minusx = minetest.get_node(vector.add(pos, {x = -1, y = 0, z = 0}))
-		local plusz = minetest.get_node(vector.add(pos, {x = 1, y = 0, z = 1}))
-		local minusz = minetest.get_node(vector.add(pos, {x = 0, y = 0, z = -1}))
-		local up = minetest.get_node(vector.add(pos, {x = 0, y = 1, z = 0}))
-		local down = minetest.get_node(vector.add(pos, {x = 0, y = -1, z = 0}))
-		mcl_bubble_column.new_neighbors[pos] = {plusx, minusx, plusz, minusz, up, down}
-		
-		if mcl_bubble_column.old_neighbors[pos] == {} then
-			mcl_bubble_column.old_neighbors[pos] = mcl_bubble_column.new_neighbors[pos]
-		else
-			if mcl_bubble_column.new_neighbors[pos] ~= mcl_bubble_column.old_neighbors[pos] then
-				--neighbors changed
-				if mcl_bubble_column.is_valid_pos(pos) == false then
-					local meta = minetest.get_meta(pos)
-					meta:set_int("bubbly", 0)
+		if meta:get_int("bubbly") == 1 then
+			local up = minetest.get_node(vector.add(pos, {x = 0, y = 1, z = 0}))
+			for _,entity in pairs(minetest.get_objects_inside_radius(pos, 0.75)) do
+				if up.name == "air" then
+					mcl_bubble_column.on_enter_bubble_column_with_air_above(entity, pos)
 				else
-					mcl_bubble_column.place_bubble_column(vector.add(pos, {x = 0, y = 1, z = 0}))
+					mcl_bubble_column.on_enter_bubble_column(entity, pos)
+				end
+			end
+		elseif meta:get_int("whirly") == 1 then
+			local up = minetest.get_node(vector.add(pos, {x = 0, y = 1, z = 0}))
+			for _,entity in pairs(minetest.get_objects_inside_radius(pos, 0.75)) do
+				if up.name == "air" then
+					mcl_bubble_column.on_enter_whirlpool_with_air_above(entity, pos)
+				else
+					mcl_bubble_column.on_enter_whirlpool(entity, pos)
 				end
 			end
 		end
 	end,
 }
 
-mcl_bubble_column.place_bubble_column = function(pos)
-	if mcl_bubble_column.can_hold_bubble_column(pos) then
-		local meta = minetest.get_meta(pos)
-		meta:set_int("bubbly", 1)
-	end
-end
-
-mcl_bubble_column.can_hold_bubble_column = function(pos)
-	local node = minetest.get_node(pos)
-	local below = minetest.get_node(vector.add(pos, {x = 0, y = -1, z = 0}))
-	local meta = minetest.get_meta(pos)
-	local bmeta = minetest.get_meta(vector.add(pos, {x = 0, y = -1, z = 0}))
-	--checks if pos is fit for bubble column
-	if node.name == "mcl_core:water_source" and (meta:get_int("bubbly") == 0 and below.name == "mcl_nether:soul_sand" or bmeta:get_int("bubbly") == 1) then
-		return true
-	else
-		return false
-	end
-end
-
-mcl_bubble_column.is_valid_pos = function(pos)
-	local below = minetest.get_node(vector.add(pos, {x = 0, y = -1, z = 0}))
-	local meta = minetest.get_meta(vector.add(pos, {x = 0, y = -1, z = 0}))
-	if meta:get_int("bubbly") == 1 or below.name == "mcl_nether:soul_sand" then
-		return true
-	else
-		return false
-	end
-end
-
-
-mcl_bubble_column.on_entity_collided_with_bubble_column = function(pos)
-	local above = minetest.get_node(vector.add(pos, {x = 0, y = 1, z = 0}))
-	if above.name == "air" then
-		mcl_bubble_column.on_enter_bubble_column_with_air_above()
-	else
-		mcl_bubble_column.on_enter_bubble_column()
-	end
-end
-
-mcl_bubble_column.on_enter_bubble_column = function(self)
-	local velocity = self.object:get_velocity()
-	velocity.y = math.min(0.7+2.3, velocity.y+0.06+2.3)
-	self.object:set_velocity(velocity)
-end
-
-mcl_bubble_column.on_enter_bubble_column_with_air_above = function(self)
-	local velocity = self.object:get_velocity()
-	velocity.y = math.min(1.8+2.3, velocity.y+0.1+2.3)
-	self.object:set_velocity(velocity)
-end
-
-minetest.register_on_mods_loaded(function()
-	for _, entity in pairs(minetest.registered_entities) do
-		local on_step = entity.on_step
-		function entity.on_step(...)
-			local self, dtime, moveresult = ...
-			--checks
-			if not moveresult then return end
-			if moveresult.collisions == {} then return end
-			if moveresult.collides == true then
-				if not moveresult.collisions[1] then return end
-				if not moveresult.collisions[1].type == "node" then return end
-				local pos = moveresult.collisions[1].node_pos
-				if pos == nil then return end
-				local uppos = vector.add(pos, {x = 0, y = 1, z = 0})
-				if minetest.get_node(uppos).name ~= "mcl_core:water_source" then return end
-				local meta = minetest.get_meta(uppos)
-				if meta:get_int("bubbly") == 1 then
-					--bubble column collision
-					--use mcl_bubble_column.on_entity_collided_with_bubble_column = function(pos) later
-					local upup = minetest.get_node(vector.add(uppos, {x = 0, y = 1, z = 0}))
-					if upup.name == "air" then
-						mcl_bubble_column.on_enter_bubble_column_with_air_above(self)
-					else
-						mcl_bubble_column.on_enter_bubble_column(self)
-					end
-				end
+minetest.register_globalstep(function()
+    for _,player in ipairs(minetest.get_connected_players()) do
+		local ppos = player:get_pos()
+		local eyepos = {x = ppos.x, y = ppos.y + player:get_properties().eye_height, z = ppos.z}
+		local node = minetest.get_node(ppos)
+		local eyenode = minetest.get_node(eyepos)
+		local meta = minetest.get_meta(ppos)
+		local eyemeta = minetest.get_meta(eyepos)
+		
+		local eyemeta = minetest.get_meta(ppos)
+		--if minetest.get_item_group(node.name, "water") == 3 and minetest.get_item_group(eyenode.name, "water") == 3 then return end
+		if meta:get_int("bubbly") == 1 or eyemeta:get_int("bubbly") == 1 then
+			local up = minetest.get_node(vector.add(eyepos, {x = 0, y = 1, z = 0}))
+			if up.name == "air" then
+				mcl_bubble_column.on_enter_bubble_column_with_air_above(player, ppos)
+			else
+				mcl_bubble_column.on_enter_bubble_column(player, ppos)
 			end
-			return on_step(...)
+		elseif meta:get_int("whirly") == 1 or eyemeta:get_int("whirly") == 1 then
+			local up = minetest.get_node(vector.add(ppos, {x = 0, y = 1, z = 0}))
+			if up.name == "air" then
+				mcl_bubble_column.on_enter_whirlpool_with_air_above(player, ppos)
+			else
+				mcl_bubble_column.on_enter_whirlpool(player, ppos)
+			end
 		end
 	end
 end)
-
-
