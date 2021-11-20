@@ -72,9 +72,8 @@ minetest.register_abm{
 }
 
 
-mcl_bubble_column.on_enter_bubble_column = function(self, pos)
+mcl_bubble_column.on_enter_bubble_column = function(self)
 	local velocity = self:get_velocity()
-	local down = minetest.get_node(vector.add(pos, {x = 0, y = -1, z = 0}))
 	--[[if down.name == "mcl_nether:soul_sand" then
 		self:add_velocity({x = 0, y = math.min(10, math.abs(velocity.y)+9.4), z = 0})
 	else]]
@@ -88,9 +87,8 @@ mcl_bubble_column.on_enter_whirlpool = function(self)
 	self:add_velocity({x = 0, y = math.max(-0.3, (-math.abs(velocity.y))-0.03), z = 0})
 end
 
-mcl_bubble_column.on_enter_bubble_column_with_air_above = function(self, pos)
+mcl_bubble_column.on_enter_bubble_column_with_air_above = function(self)
 	local velocity = self:get_velocity()
-	local down = minetest.get_node(vector.add(pos, {x = 0, y = -1, z = 0}))
 	--[[if down.name == "mcl_nether:soul_sand" then
 		self:add_velocity({x = 0, y = math.min(4.3, math.abs(velocity.y)+2.8), z = 0})
 	else]]
@@ -116,18 +114,18 @@ minetest.register_abm{
 			local up = minetest.get_node(vector.add(pos, {x = 0, y = 1, z = 0}))
 			for _,entity in pairs(minetest.get_objects_inside_radius(pos, 0.75)) do
 				if up.name == "air" then
-					mcl_bubble_column.on_enter_bubble_column_with_air_above(entity, pos)
+					mcl_bubble_column.on_enter_bubble_column_with_air_above(entity)
 				else
-					mcl_bubble_column.on_enter_bubble_column(entity, pos)
+					mcl_bubble_column.on_enter_bubble_column(entity)
 				end
 			end
 		elseif meta:get_int("whirly") == 1 then
 			local up = minetest.get_node(vector.add(pos, {x = 0, y = 1, z = 0}))
 			for _,entity in pairs(minetest.get_objects_inside_radius(pos, 0.75)) do
 				if up.name == "air" then
-					mcl_bubble_column.on_enter_whirlpool_with_air_above(entity, pos)
+					mcl_bubble_column.on_enter_whirlpool_with_air_above(entity)
 				else
-					mcl_bubble_column.on_enter_whirlpool(entity, pos)
+					mcl_bubble_column.on_enter_whirlpool(entity)
 				end
 			end
 		end
@@ -148,16 +146,16 @@ minetest.register_globalstep(function()
 		if meta:get_int("bubbly") == 1 or eyemeta:get_int("bubbly") == 1 then
 			local up = minetest.get_node(vector.add(eyepos, {x = 0, y = 1, z = 0}))
 			if up.name == "air" then
-				mcl_bubble_column.on_enter_bubble_column_with_air_above(player, ppos)
+				mcl_bubble_column.on_enter_bubble_column_with_air_above(player)
 			else
-				mcl_bubble_column.on_enter_bubble_column(player, ppos)
+				mcl_bubble_column.on_enter_bubble_column(player)
 			end
 		elseif meta:get_int("whirly") == 1 or eyemeta:get_int("whirly") == 1 then
 			local up = minetest.get_node(vector.add(ppos, {x = 0, y = 1, z = 0}))
 			if up.name == "air" then
-				mcl_bubble_column.on_enter_whirlpool_with_air_above(player, ppos)
+				mcl_bubble_column.on_enter_whirlpool_with_air_above(player)
 			else
-				mcl_bubble_column.on_enter_whirlpool(player, ppos)
+				mcl_bubble_column.on_enter_whirlpool(player)
 			end
 		end
 	end
